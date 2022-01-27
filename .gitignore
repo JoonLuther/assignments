@@ -1,5 +1,10 @@
-hello
+*.swp
 fortune
+hello
+snackbar
+rpc
+password
+*.class
 a.out
 
 # Prerequisites
