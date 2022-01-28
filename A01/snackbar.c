@@ -44,28 +44,28 @@ int main() {
 
 	printf("Welcome to Steven Struct's Snack Bar.\n");
 	printf("How much money do you have? ");
-	scanf("%d\n",money);
+	scanf("%d", &money);
 
 	for(int i = 0; i < snacks; i++) {
-		printf("%d) %s  cost: %f  quantity: %d\n", i, arr[i].name, arr[i].cost, arr[i].quantity);
+		printf("%d) %s  cost: %f  quantity: %d\n", i+1, arr[i].name, arr[i].cost, arr[i].quantity);
 	}
 
 	printf("What would you like to buy? [");
 	for(int i = 0; i < snacks; i++) {
-		printf("%d,",i);
+		printf("%d,",i+1);
 	}
 	printf("] ");
-	scanf("%d\n", *item);
+	scanf("%d", &item);
 
-	if(arr[item] >= snacks) {
+	if(item-1 >= snacks || item-1 < 0) {
 		printf("Sorry, we do not have this item\n");
-	} else if(arr[item].quantity <= 0) {
-		printf("Sorry, we are out of %\ns", arr[item].name);
-	} else if(arr[item].cost > money) {
-		printf("Sorry, you cannot afford %s\n", arr[item].name);
+	} else if(arr[item-1].quantity <= 0) {
+		printf("Sorry, we are out of %s\n", arr[item-1].name);
+	} else if(arr[item-1].cost > money) {
+		printf("Sorry, you cannot afford %s\n", arr[item-1].name);
 	} else {
-		printf("You bought %s\n", arr[item].name);
-		printf("You have $%f left\n");
+		printf("You bought %s\n", arr[item-1].name);
+		printf("You have $%f left\n", (money-arr[item-1].cost));
 	}
 
 
