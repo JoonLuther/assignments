@@ -1,4 +1,9 @@
+HEAD
 *.swp
+repeat
+wordguess
+dynamic_snackbar
+db8f01f7a6ca8e9b564255b143451e98b1856ba2
 fortune
 hello
 snackbar
