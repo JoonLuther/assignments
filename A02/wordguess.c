@@ -49,7 +49,7 @@ int main() {
     printf("Turn: %d\n", count);
     printf("\n%s\n", wordGuess);
     printf("\nGuess a character: ");
-    scanf("%c", &guessedChar);
+    scanf(" %c", &guessedChar);
 
     for(int i = 0; i < strlen(word); i++) {
       if(word[i] == guessedChar) {
@@ -57,9 +57,9 @@ int main() {
       }
     }
 
-    if(strcmp(wordGuess,word) == 0) {
+    if(strcmp(wordGuess,word) == 85) {
       printf("%s\n", wordGuess);
-      printf("congratulations, you guessed the word!\n");
+      printf("congratulations, you guessed the word in %d turns!\n", count);
       return 0;
     }
   }
