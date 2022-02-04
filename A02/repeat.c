@@ -21,8 +21,7 @@ int main() {
   scanf("%s", str1);
   printf("Enter a word count: \n");
   scanf("%d", &repeat);
-  len = (strlen(str1)*repeat);
-  printf("%d", len);
+  len = ((strlen(str1)*repeat) + 1);
 
   p = malloc(sizeof(char)*len);
   if (p == NULL) {
