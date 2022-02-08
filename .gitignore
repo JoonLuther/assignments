@@ -1,5 +1,11 @@
 HEAD
+HEAD
 *.swp
+sorted_snackbar
+dynamic_snackbar
+match_braces
+magic_square
+874a0492b7906564dd7074a3b02fcb47388681de
 repeat
 wordguess
 dynamic_snackbar
