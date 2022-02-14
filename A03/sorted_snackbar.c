@@ -66,6 +66,7 @@ void clear(struct snack* snacks) {
       temp = snacks;
       snacks = snacks->next;
       free(temp);
+      temp = NULL;
   }
   return;
 }
