@@ -101,14 +101,11 @@ void readMatrix(char *p) {
             printf("\n");
         }
         fscanf(infile, "%d", &c);
-
     }
 
     isMagicSquare(ptr,l);
- 
     free(ptr);
     ptr = NULL;
-
     fclose(infile);
 
 }
