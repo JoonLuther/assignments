@@ -27,7 +27,6 @@ struct ppm_pixel* read_ppm(const char* filename, int* w, int* h) {
     *w = atoi(str);
     fscanf(infile, "%d %d", h, &maxVal);
   } else {
-    //skipping comment
     while(fgetc(infile) != '\n');
     fscanf(infile, "%d %d %d", w, h, &maxVal);
   }
@@ -36,7 +35,7 @@ struct ppm_pixel* read_ppm(const char* filename, int* w, int* h) {
 
   struct ppm_pixel *ptr = malloc(sizeof(struct ppm_pixel) * *h * *w);
   fread(ptr, sizeof(int), *h * *w, infile);
-  
+
   fclose(infile);
   return ptr;
 }
@@ -74,7 +73,7 @@ extern void write_ppm(const char* filename, struct ppm_pixel* pxs, int w, int h)
   }
 
   for(int i = 0; i < (w*h); i++) {
-    fwrite(&pxs[i], sizeof(struct ppm_pixel), 1, outfile);
+    fwrite(&(pxs[i]), sizeof(struct ppm_pixel), 1, outfile);
   }
 
   fclose(outfile);
