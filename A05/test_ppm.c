@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
   struct ppm_pixel *pixels;
 
   pixels = read_ppm("feep-raw.ppm", w, h);
-  write_ppm("feep-raw-test.ppm", pixels, *w, *h);
+  write_ppm("feep-raw.ppm", pixels, *w, *h);
   free(pixels);
   pixels = NULL;
   return 0;
