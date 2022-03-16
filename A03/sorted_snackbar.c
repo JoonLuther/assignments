@@ -24,7 +24,8 @@ struct snack {
 // Returns the first item in the list
 struct snack* insert_sorted(struct snack* snacks, const char* name, int quantity, float cost) {
 
-  struct snack* newNode = (struct snack*)malloc(sizeof(struct snack));
+  struct snack* newNode;
+  newNode = (struct snack*)malloc(sizeof(struct snack));
   strcpy(newNode->name, name);
   newNode->quantity = quantity;
   newNode->cost = cost;
@@ -32,6 +33,7 @@ struct snack* insert_sorted(struct snack* snacks, const char* name, int quantity
   struct snack* curr = snacks;
 
   if(curr == NULL) {
+    newNode->next = NULL;
     return newNode;
   }
 
@@ -41,7 +43,8 @@ struct snack* insert_sorted(struct snack* snacks, const char* name, int quantity
   } 
 
   while(curr->next != NULL) {
-    if (strcmp(newNode->name,curr->name) >= 0 && strcmp(newNode->name,curr->name) < 0) { //insert between nodes
+    if (strcmp(newNode->name,curr->name) >= 0 && strcmp(newNode->name,curr->next->name) < 0) { //insert between nodes
+      //printf("inserting %s between %s and %s\n", newNode->name, curr->name, curr->next->name);
       struct snack temp = *curr;
       curr->next = newNode;
       newNode->next = temp.next;
@@ -50,7 +53,7 @@ struct snack* insert_sorted(struct snack* snacks, const char* name, int quantity
     curr = curr->next;
   }
 
-  curr->next = newNode;
+  curr->next = newNode; //insert tail
   newNode->next = NULL;
   return snacks;
 
@@ -118,4 +121,3 @@ int main() {
 
   return 0;
 }
-

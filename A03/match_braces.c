@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
   char open = '{';
   char close = '}';
   struct node* topNode = NULL;
-  int line = 0;
+  int line = 1;
   int col = 0;
 
   if(argv[0] == NULL) {
