@@ -11,27 +11,31 @@ struct snack {
 int main() {
 
     int numSnacks;
+    struct snack *ptr;
 
     printf("Enter a number of snacks: ");
     scanf("%d", &numSnacks);
-    struct snack snacks[numSnacks];
+    ptr = (struct snack*) malloc(sizeof(struct snack) * numSnacks);
 
     for(int i = 0; i < numSnacks; i++) {
 
       printf("Enter a name: ");
-      scanf("%s", snacks[i].name);
+      scanf("%s", ptr[i].name);
       printf("Enter a cost: ");
-      scanf("%f", &snacks[i].cost);
+      scanf("%f", &ptr[i].cost);
       printf("Enter a quantity: ");
-      scanf("%d", &snacks[i].quantity);
+      scanf("%d", &ptr[i].quantity);
 
     }
 
     for(int i = 0; i < numSnacks; i++) {
 
-      printf("%d) name: %s, cost: %f, quantity: %d\n", i+1, snacks[i].name, snacks[i].cost, snacks[i].quantity);
+      printf("%d) name: %s, cost: %f, quantity: %d\n", i+1, ptr[i].name, ptr[i].cost, ptr[i].quantity);
 
     }
+
+    free(ptr);
+    ptr = NULL;
 
   return 0;
 
