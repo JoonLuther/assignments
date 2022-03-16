@@ -31,6 +31,7 @@ struct node* push(char sym, int line, int col, struct node* top) {
   struct node* curr = top;
 
   if(curr == NULL) {
+    newNode->next = NULL;
     return newNode;
   }
   newNode->next = top;
@@ -88,7 +89,7 @@ int main(int argc, char* argv[]) {
   int line = 1;
   int col = 0;
 
-  if(argv[0] == NULL) {
+  if(argv[1] == NULL) {
     printf("No Command Line Args Given");
     return 0;
   }
