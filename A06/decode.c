@@ -9,16 +9,16 @@ unsigned char * decode_ppm(struct ppm_pixel *pix, int *w, int *h) {
   int curr_ch;
 
   for(int i = 0; i < (*w * *h); i++) {
-    int_array[3*i] = (pix[i].red)%2;
-    int_array[(3*i+1)] = (pix[i].green)%2;
-    int_array[3*i+2] = (pix[i].blue)%2;
+    int_array[3*i] = (pix[i].red & 1);
+    int_array[(3*i+1)] = (pix[i].green & 1); 
+    int_array[3*i+2] = (pix[i].blue & 1); 
   }
 
   for(int i = 0; i < ((sizeof(char)* *w * *h *3)/8); i++) {
     curr_ch = 0;
     for(int j = 0; j < 8; j++) {
       printf("%d", int_array[8 * i + j]);
-      curr_ch += (int_array[(8*i)+j]*(int)(pow(2,(8-(j+1)))));
+      curr_ch += (int_array[8*i+j] << (8-(j+1)));
     }
     printf("\n");
     ch_array[i] = curr_ch;
