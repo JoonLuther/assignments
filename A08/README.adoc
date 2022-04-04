@@ -7,18 +7,94 @@ Where did your run your tests? A laptop, or goldengate?
 What are the performance specifications of the machine: number and speed of
 processors, size of RAM? (use `lscpu` and `free -m`)
 
-    64 CPU's, 1200.027 mHz, 
+    64 CPU's, 1200.027 mHz, total mem: 95320 
 
 = Allocations
 
 In `simple.c`, where does the increase in 1040 bytes come from?
 Why is the value 1040 bytes?
 
-
+    The print statement after the first sbrk(0) makes a call to malloc and more memory is allocated. I do not know why the increase is 1040 bytes.
 
 How many bytes does `mylloc_list.c` allocate when the program ends? Explain why
 this amount makes sense.
 
+    mylloc_list.c allocates 1156 bytes when the program ends.
+
+    malloc in mylloc_list.c allocates extra bytes when assigning chunks of memory: this is because sbrk increments by the requested size plus the size of struct chunk, which is
+    16 bytes. Therefore, when reallocate calls malloc(100), 116 bytes are actually being allocated to act as a security mechanism. In theory, this is repeated 10 times to get a total
+    of 1160 bytes. However, I do not know why the program only allocates 1156 instead of 1160.  
 
 = Fragementation
+
+What is fragmentation? What is the difference between internal and external fragmentation?
+
+    I think fragmentation is when memory is not allocated in an efficient way, causing large amounts of memory to be inaccessible. For example, in mylloc_list, malloc 
+    will designate freed or new memory to store data when it is called. The amount of bytes requested could be much less than the chunk of freed memory being used to store
+    the new memory, and thus, there are chunks of memory not being fully used by new calls to malloc that cannot be used in subsequent calls to malloc, thus fragmentation occurs.
+
+Include your output in the README.adoc
+
+The initial top of the heap is 0x7f79a88ec000.
+Total blocks: 161 Free: 103 Used: 58
+Internal unused: total: 178682 average: 1786.000000 smallest: 929 largest: 3999
+External unused: total: 144345 average: 1401.000000 smallest: 10 largest: 3984
+0
+The current top of the heap is 0x7f79a8942527.
+Increased by 345 (0x159) Kbyte
+Total blocks: 167 Free: 113 Used: 54
+Internal unused: total: 159454 average: 1594.000000 smallest: 1493 largest: 3999
+External unused: total: 177549 average: 1571.000000 smallest: 10 largest: 3984
+1
+The current top of the heap is 0x7f79a8948327.
+Increased by 368 (0x170) Kbyte
+Total blocks: 169 Free: 117 Used: 52
+Internal unused: total: 157088 average: 1570.000000 smallest: 1891 largest: 3999
+External unused: total: 189341 average: 1618.000000 smallest: 10 largest: 3997
+2
+The current top of the heap is 0x7f79a894a282.
+Increased by 376 (0x178) Kbyte
+Total blocks: 172 Free: 120 Used: 52
+Internal unused: total: 160672 average: 1606.000000 smallest: 929 largest: 4000
+External unused: total: 201235 average: 1676.000000 smallest: 10 largest: 3998
+3
+The current top of the heap is 0x7f79a894d188.
+Increased by 388 (0x184) Kbyte
+Total blocks: 175 Free: 125 Used: 50
+Internal unused: total: 145974 average: 1459.000000 smallest: 1493 largest: 4000
+External unused: total: 222205 average: 1777.000000 smallest: 10 largest: 3999
+4
+The current top of the heap is 0x7f79a8950095.
+Increased by 400 (0x190) Kbyte
+Total blocks: 176 Free: 116 Used: 60
+Internal unused: total: 191611 average: 1916.000000 smallest: 1493 largest: 4000
+External unused: total: 189140 average: 1630.000000 smallest: 10 largest: 3999
+5
+The current top of the heap is 0x7f79a8951045.
+Increased by 404 (0x194) Kbyte
+Total blocks: 176 Free: 128 Used: 48
+Internal unused: total: 153391 average: 1533.000000 smallest: 1909 largest: 4000
+External unused: total: 227231 average: 1775.000000 smallest: 10 largest: 4000
+6
+The current top of the heap is 0x7f79a8951045.
+Increased by 404 (0x194) Kbyte
+Total blocks: 177 Free: 125 Used: 52
+Internal unused: total: 154837 average: 1548.000000 smallest: 1891 largest: 4000
+External unused: total: 219943 average: 1759.000000 smallest: 10 largest: 3999
+7
+The current top of the heap is 0x7f79a8951ff5.
+Increased by 407 (0x197) Kbyte
+Total blocks: 178 Free: 118 Used: 60
+Internal unused: total: 193404 average: 1934.000000 smallest: 1891 largest: 4000
+External unused: total: 193697 average: 1641.000000 smallest: 10 largest: 4000
+8
+The current top of the heap is 0x7f79a8952fa5.
+Increased by 411 (0x19b) Kbyte
+Total blocks: 178 Free: 130 Used: 48
+Internal unused: total: 150237 average: 1502.000000 smallest: 1909 largest: 4000
+External unused: total: 237661 average: 1828.000000 smallest: 10 largest: 4000
+9
+The current top of the heap is 0x7f79a8952fa5.
+Increased by 411 (0x19b) Kbyte
+
 
