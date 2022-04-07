@@ -12,6 +12,9 @@ int main(int argc, char* argv[]) {
   float ymin = -1.12;
   float ymax = 1.12;
   int maxIterations = 1000;
+  struct ppm_pixel* pallet;
+  struct ppm_pixel* img;
+  struct ppm_pixel black;
 
   int opt;
   while ((opt = getopt(argc, argv, ":s:l:r:t:b:")) != -1) {
@@ -30,8 +33,53 @@ int main(int argc, char* argv[]) {
 
   // todo: your work here
   // generate pallet
+  pallet = malloc(sizeof(struct ppm_pixel)*maxIterations);
   srand(time(0));
+  for(int i = 0; i < maxIterations; i++) {
+    struct ppm_pixel color;
+    color.red = rand()%255;
+    color.green = rand()%255;
+    color.blue = rand()%255;
+    pallet[i] = color;
+    //printf("%d color: %d\n", i, pallet[i].red);
+  }
 
   // compute image
+
+  img = malloc(sizeof(struct ppm_pixel) * size * size);
+  black.red = 0;
+  black.green = 0;
+  black.blue = 0;
+
+  for(int row = 0; row < size; row++) {
+    for(int col = 0; col < size; col++) {
+      float xfrac = ((float)row)/size;
+      float yfrac = ((float)col)/size;
+      float x0 = xmin + xfrac * (xmax - xmin);
+      float y0 = ymin + yfrac * (ymax - ymin);
+
+      float x = 0;
+      float y = 0;
+      int iter = 0;
+
+      while(iter < maxIterations && ((x*x) + (y*y)) < (2*2)) {
+        float xtmp = (x*x) - (y*y) + x0;
+        y = (2*x*y) + y0;
+        x = xtmp;
+        iter++;
+      }
+      if(iter < maxIterations) { //escaped!
+        img[(col * size) + row] = pallet[iter];
+      } else { //did not escape
+        img[(col * size) + row] = black;
+      }
+    }
+  }
+
+  write_ppm("test.ppm", img, size, size);
+  free(pallet);
+  free(img);
+  pallet = NULL;
+  img = NULL;
 
 }
