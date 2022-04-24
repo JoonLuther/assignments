@@ -6,8 +6,11 @@
 #include <pthread.h>
 #include "read_ppm.h"
 #include <sys/time.h>
+#include <math.h>
 
 pthread_mutex_t mutex;
+//pthread_barrier_t barrier;
+
 
 struct thread_data {
   int startrow;
@@ -20,6 +23,8 @@ struct thread_data {
   float ymax;
   int maxIterations;
   int size;
+  int** membership;
+  int** count;
   struct ppm_pixel** img;
   struct ppm_pixel *pallet;
   struct ppm_pixel black;
@@ -29,6 +34,9 @@ void *compute_image(void *args) {
 
   struct thread_data *data = (struct thread_data *) args;
   printf("Thread %lu) sub-image block: cols (%d, %d) to rows (%d,%d)\n", (unsigned long)pthread_self(), data->startcol, data->endcol, data->startrow, data->endrow);
+
+  //Step 1:
+  printf("hell01\n");
 
   for(int row = data->startrow; row < data->endrow; row++) {
     for(int col = data->startcol; col < data->endcol; col++) {
@@ -48,16 +56,84 @@ void *compute_image(void *args) {
         iter++;
       }
 
-
-      pthread_mutex_lock(&mutex);
       if(iter < data->maxIterations) { //escaped!
-        data->img[row][col] = data->pallet[iter];
+        data->membership[row][col] = 0;
       } else { //did not escape
-        data->img[row][col] = data->black;
+        data->membership[row][col] = 1;
       }
-      pthread_mutex_unlock(&mutex);
     }
   }
+  printf("hell02\n");
+
+  //Step 2:
+
+  long max_count = 0;
+  
+  for(int row = data->startrow; row < data->endrow; row++) {
+    for(int col = data->startcol; col < data->endcol; col++) {
+      //printf("loop: %d\n\n", (row*col) + col);
+      if (data->membership[row][col] == 1) {
+        continue;
+      } else {
+        float xfrac = ((float)row) / data->size;
+        float yfrac = ((float)col) / data->size;
+        float x0 = data->xmin + xfrac * (data->xmax - data->xmin);
+        float y0 = data->ymin + yfrac * (data->ymax - data->ymin);
+
+        float x = 0;
+        float y = 0;
+
+        while (x*x + y*y < 2*2) {
+          //printf("(%f, %f)\n", x, y);
+          float xtmp = x * x + y * y + x0;
+          y = 2 * x * y + y0;
+          x = xtmp;
+
+          float yrow = round(data->size * (y - data->ymin) / (data->ymax - data->ymin));
+          float xcol = round(data->size * (x - data->xmin) / (data->xmax - data->xmin));
+
+          if (yrow < 0 || yrow >= data->size) continue; // out of range
+          if (xcol < 0 || xcol >= data->size) continue; // out of range
+
+          pthread_mutex_lock(&mutex);
+          data->count[row][col]++;
+
+          if (data->count[row][col] > max_count) {
+            max_count = data->count[row][col];
+          }
+          pthread_mutex_unlock(&mutex);
+        }
+      }
+    }
+  }
+
+  //pthread_barrier_wait(&barrier);
+
+  //Step 3:
+
+  float gamma = 0.681;
+  float factor = 1.0/gamma;
+  
+  for(int row = data->startrow; row < data->endrow; row++) {
+    for(int col = data->startcol; col < data->endcol; col++) {
+
+      float value = 0;
+      struct ppm_pixel color;
+
+      if(data->count[row][col] > 0) {
+        value = log(data->count[row][col]) / log(max_count);
+        value = pow(value, factor);
+      }
+
+      color.red = value * 255;
+      color.green = value * 255;
+      color.blue = value * 255;
+
+      data->img[row][col] = color;
+
+    }
+  }
+
   return (void*) NULL;
 }
 
@@ -93,6 +169,7 @@ int main(int argc, char* argv[]) {
 
   // todo: your code here
   pthread_mutex_init(&mutex, NULL);
+  //pthread_barrier_init(&barrier, NULL, 4);
   pthread_t tid[4];
 
   // generate pallet
@@ -115,9 +192,19 @@ int main(int argc, char* argv[]) {
   gettimeofday(&tstart, NULL);
 
   struct ppm_pixel** img = malloc(sizeof(struct ppm_pixel*) * size);
+  int** membership = malloc(sizeof(int*) * size);
+  int** counts = malloc(sizeof(int*) * size);
+
   for (int i = 0; i < size; i++) {
     img[i] = malloc(sizeof(struct ppm_pixel) * size); 
   }
+  for (int i = 0; i < size; i++) {
+    membership[i] = malloc(sizeof(int*) * size); 
+  }
+  for (int i = 0; i < size; i++) {
+    counts[i] = malloc(sizeof(int*) * size); 
+  }
+
   struct thread_data* ids = malloc(sizeof(struct thread_data) * numProcesses); // 4 threads
   int count = 0;
 
@@ -136,6 +223,8 @@ int main(int argc, char* argv[]) {
       ids[count].img = img;
       ids[count].pallet = pallet;
       ids[count].black = black;
+      ids[count].membership = membership;
+      ids[count].count = counts;
       pthread_create(&tid[count], NULL, compute_image, &ids[count]);
       count++;
     }
