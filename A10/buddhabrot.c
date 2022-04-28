@@ -9,8 +9,7 @@
 #include <math.h>
 
 pthread_mutex_t mutex;
-//pthread_barrier_t barrier;
-
+pthread_barrier_t barrier;
 
 struct thread_data {
   int startrow;
@@ -36,12 +35,11 @@ void *compute_image(void *args) {
   printf("Thread %lu) sub-image block: cols (%d, %d) to rows (%d,%d)\n", (unsigned long)pthread_self(), data->startcol, data->endcol, data->startrow, data->endrow);
 
   //Step 1:
-  printf("hell01\n");
 
   for(int row = data->startrow; row < data->endrow; row++) {
     for(int col = data->startcol; col < data->endcol; col++) {
-      float xfrac = ((float)row)/data->size;
-      float yfrac = ((float)col)/data->size;
+      float xfrac = ((float)col)/data->size;
+      float yfrac = ((float)row)/data->size;
       float x0 = data->xmin + xfrac * (data->xmax - data->xmin);
       float y0 = data->ymin + yfrac * (data->ymax - data->ymin);
 
@@ -63,29 +61,29 @@ void *compute_image(void *args) {
       }
     }
   }
-  printf("hell02\n");
 
   //Step 2:
 
   long max_count = 0;
-  
   for(int row = data->startrow; row < data->endrow; row++) {
     for(int col = data->startcol; col < data->endcol; col++) {
       //printf("loop: %d\n\n", (row*col) + col);
       if (data->membership[row][col] == 1) {
         continue;
       } else {
-        float xfrac = ((float)row) / data->size;
-        float yfrac = ((float)col) / data->size;
+        float xfrac = ((float)col) / data->size;
+        float yfrac = ((float)row) / data->size;
         float x0 = data->xmin + xfrac * (data->xmax - data->xmin);
         float y0 = data->ymin + yfrac * (data->ymax - data->ymin);
 
         float x = 0;
         float y = 0;
+	int iter = 0;
 
-        while (x*x + y*y < 2*2) {
+        while (x*x + y*y < 2*2 && iter < data->maxIterations) {
           //printf("(%f, %f)\n", x, y);
-          float xtmp = x * x + y * y + x0;
+	  iter++;
+          float xtmp = x * x - y * y + x0;
           y = 2 * x * y + y0;
           x = xtmp;
 
@@ -96,18 +94,21 @@ void *compute_image(void *args) {
           if (xcol < 0 || xcol >= data->size) continue; // out of range
 
           pthread_mutex_lock(&mutex);
-          data->count[row][col]++;
+          data->count[(int)yrow][(int)xcol]++;
 
-          if (data->count[row][col] > max_count) {
-            max_count = data->count[row][col];
+          if (data->count[(int)yrow][(int)xcol] > max_count) {
+            max_count = data->count[(int)yrow][(int)xcol];
           }
           pthread_mutex_unlock(&mutex);
         }
+
+	if(iter >= data->maxIterations) {
+		printf("%d, %d, escaped: %d\n",row,col, data->membership[row][col]);
+	}
       }
     }
   }
-
-  //pthread_barrier_wait(&barrier);
+  pthread_barrier_wait(&barrier);
 
   //Step 3:
 
@@ -169,7 +170,7 @@ int main(int argc, char* argv[]) {
 
   // todo: your code here
   pthread_mutex_init(&mutex, NULL);
-  //pthread_barrier_init(&barrier, NULL, 4);
+  pthread_barrier_init(&barrier, NULL, 4);
   pthread_t tid[4];
 
   // generate pallet
@@ -234,7 +235,6 @@ int main(int argc, char* argv[]) {
     pthread_join(tid[i], NULL);
   }
 
-
   write_ppm("threaded_buddhabrot.ppm", img, size, size);
 
   gettimeofday(&tend, NULL);
@@ -244,7 +244,10 @@ int main(int argc, char* argv[]) {
   free(pallet);
   for (int i = 0; i < size; i++) {
     free(img[i]);
+    free(membership[i]);
+    free(counts[i]);
   }
+
   free(img);
   free(ids);
   pallet = NULL;
