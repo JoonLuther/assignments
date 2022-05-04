@@ -4,6 +4,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include "read_ppm.h"
+#include <string.h>
 
 int main(int argc, char* argv[]) {
   int size = 480;
@@ -13,8 +14,13 @@ int main(int argc, char* argv[]) {
   float ymax = 1.12;
   int maxIterations = 1000;
   struct ppm_pixel* pallet;
-  struct ppm_pixel* img;
+  struct ppm_pixel** img;
   struct ppm_pixel black;
+  char fnameSize[100];
+  char fnameTime[100];
+  struct timeval timez;
+  double timer;
+  struct timeval tstart, tend;
 
   int opt;
   while ((opt = getopt(argc, argv, ":s:l:r:t:b:")) != -1) {
@@ -41,12 +47,16 @@ int main(int argc, char* argv[]) {
     color.green = rand()%255;
     color.blue = rand()%255;
     pallet[i] = color;
-    //printf("%d color: %d\n", i, pallet[i].red);
   }
 
   // compute image
 
-  img = malloc(sizeof(struct ppm_pixel) * size * size);
+  gettimeofday(&tstart, NULL);
+
+  img = malloc(sizeof(struct ppm_pixel*) * size);
+  for(int i = 0; i < size; i++) {
+    img[i] = malloc(sizeof(struct ppm_pixel) * size);
+  }
   black.red = 0;
   black.green = 0;
   black.blue = 0;
@@ -69,15 +79,33 @@ int main(int argc, char* argv[]) {
         iter++;
       }
       if(iter < maxIterations) { //escaped!
-        img[(col * size) + row] = pallet[iter];
+        img[col][row] = pallet[iter];
       } else { //did not escape
-        img[(col * size) + row] = black;
+        img[col][row] = black;
       }
     }
   }
+  gettimeofday(&tend, NULL);
+  timer = tend.tv_sec - tstart.tv_sec + (tend.tv_usec - tstart.tv_usec)/1.e6;
+  printf("time is %g s\n", timer);
 
-  write_ppm("test.ppm", img, size, size);
+  gettimeofday(&timez, NULL);
+  sprintf(fnameSize, "%d", size);
+  int stringSize = strlen(fnameSize);
+  fnameSize[stringSize] = '-';
+  sprintf(fnameTime, "%d", (int)timez.tv_sec);
+  strcat(fnameTime,"-single-mandelbrot.ppm");
+  stringSize+=(strlen(fnameTime) + 1);
+  char newName[100];
+  strncpy(newName, fnameSize, stringSize + 1);
+  strcat(newName, fnameTime);
+  newName[stringSize + 1] = '\0';
+
+  write_ppm(newName, img, size, size);
   free(pallet);
+  for(int i = 0; i < size; i++) {
+    free(img[i]);
+  }
   free(img);
   pallet = NULL;
   img = NULL;
